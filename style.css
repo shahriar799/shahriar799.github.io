@@ -289,18 +289,14 @@ section{scroll-margin-top:76px}
 
 /* sourcing */
 .src{display:grid;gap:40px}
-@media(min-width:980px){.src{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:56px;align-items:stretch}}
+@media(min-width:980px){.src{grid-template-columns:minmax(0,1fr) minmax(0,380px);gap:56px;align-items:center}}
 .steps{display:grid;gap:12px;counter-reset:s}
 .step{display:flex;gap:18px;padding:20px;border-radius:var(--r);background:var(--panel);border:1px solid var(--line)}
 .step::before{counter-increment:s;content:counter(s,decimal-leading-zero);font-family:var(--f-mono);font-size:14px;color:var(--gold);padding-top:3px}
 .step h3{font-size:18px}
 .step p{color:var(--muted);font-size:15px;margin-top:5px}
-.case{border-radius:var(--r-lg);overflow:hidden;border:1px solid var(--line);background:var(--panel)}
-.case video{width:100%;aspect-ratio:4/5;object-fit:cover;background:var(--ink)}
-.case-body{padding:24px}
-.case-body h3{font-size:24px}
-.case-body p{color:var(--muted);margin-top:10px}
-.case-stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:18px}
+.case-stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:12px}
+@media(min-width:620px){.case-stats{grid-template-columns:repeat(4,minmax(0,1fr))}}
 .case-stats div{padding:14px;border-radius:var(--r-sm);background:var(--ink-2);border:1px solid var(--line)}
 .case-stats b{display:block;font-variant-numeric:tabular-nums;font-family:var(--f-display);font-size:24px;color:var(--gold)}
 .case-stats span{font-size:14px;color:var(--muted)}
@@ -408,7 +404,7 @@ a.cc:hover{border-color:var(--gold-2)}
 }
 
 /* sourcing: case card matches the steps column height on desktop */
-@media(min-width:980px){.case{display:flex;flex-direction:column}.case video{flex:1 1 0;min-height:240px;aspect-ratio:auto}}
+
 
 img.mono{object-fit:cover;background:none;border:1.5px solid var(--gold)}
 
@@ -419,3 +415,13 @@ b,strong{font-weight:600}
 .js .fab{opacity:0;transform:translateY(12px);pointer-events:none;transition:opacity .3s,transform .3s var(--ease)}
 .js .fab.show{opacity:1;transform:none;pointer-events:auto}
 .proj-go > span:first-child{color:var(--muted)}
+
+/* sourcing: the Fyndora reel stays a full 9:16 reel; the text column is tightened to its height */
+.steps{gap:10px}
+.step{padding:16px 18px}
+.step p{margin-top:2px}
+.reel{margin:0;width:100%;max-width:380px;justify-self:center}
+.reel video{display:block;width:100%;aspect-ratio:9/16;object-fit:cover;border-radius:var(--r-lg);border:1px solid var(--line);background:var(--ink)}
+.reel figcaption{margin-top:12px;font-size:14px;color:var(--muted);text-align:center}
+.case-stats div{padding:12px}
+.case-stats b{font-size:clamp(17px,1.7vw,24px);white-space:nowrap}
