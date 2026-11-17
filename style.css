@@ -526,3 +526,6 @@ b,strong{font-weight:600}
 .journey-photos .journey-photo{max-width:none;aspect-ratio:3/4}
 @media(min-width:980px){.journey{align-items:stretch}.journey-photos{display:flex;flex-direction:column;max-width:440px}.journey-photos .journey-photo{flex:1 1 0;min-height:260px;aspect-ratio:auto}}
 .journey-photos .journey-photo:nth-child(2) img{object-position:50% 20%;filter:none}
+
+/* reviews are back, between the trust intro and the stats/platform cards */
+.rv-trust{margin-bottom:16px}
