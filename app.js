@@ -139,7 +139,7 @@
   $('#gallery').addEventListener('click', e => {
     const b = e.target.closest('.g-item'); if (!b) return;
     const vis = $$('.g-item', $('#gallery')).filter(x => !x.hidden);
-    const items = vis.map(x => { const im = $('img', x); return { type: 'img', src: im.src, alt: im.alt, cap: $('figcaption', x).textContent }; });
+    const items = vis.map(x => { const im = $('img', x); return { type: 'img', src: im.src, alt: im.alt, cap: im.alt }; });
     open(items, vis.indexOf(b));
   });
   $('#videos').addEventListener('click', e => {
