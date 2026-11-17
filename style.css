@@ -413,3 +413,5 @@ a.cc:hover{border-color:var(--gold-2)}
 
 /* sourcing: case card matches the steps column height on desktop */
 @media(min-width:980px){.case{display:flex;flex-direction:column}.case video{flex:1 1 0;min-height:240px;aspect-ratio:auto}}
+
+img.mono{object-fit:cover;background:none;border:1.5px solid var(--gold)}
