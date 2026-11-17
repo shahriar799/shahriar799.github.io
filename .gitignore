@@ -3,3 +3,4 @@ _previews/
 assets/work/raw/
 assets/sites/raw/
 *.md
+.hallmark/

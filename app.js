@@ -29,6 +29,11 @@
   }), { rootMargin: '0px 0px -8% 0px' });
   $$('.rv-up').forEach(el => io.observe(el));
 
+  /* floating WhatsApp appears once the hero (and its own WhatsApp button) is passed */
+  const fab = $('.fab'), hero = $('.hero');
+  const syncFab = () => fab && hero && fab.classList.toggle('show', hero.getBoundingClientRect().bottom < 0);
+  addEventListener('scroll', syncFab, { passive: true }); syncFab();
+
   /* filter tabs */
   $$('.tabs[data-filter]').forEach(bar => {
     const grid = document.getElementById(bar.dataset.filter);
