@@ -336,6 +336,10 @@ section{scroll-margin-top:76px}
 .rv .job{margin-top:auto;padding-top:12px;border-top:1px solid var(--line);font-size:13px;color:var(--muted);display:flex;justify-content:space-between;gap:10px}
 .rv .job em{font-style:normal;color:var(--gold)}
 
+img.av{object-fit:cover;padding:0}
+.rv-head small{display:flex;align-items:center;gap:6px}
+.flag{width:18px;height:12px;border-radius:2px;box-shadow:0 0 0 1px var(--line-2);flex:none}
+
 /* contact */
 .contact{display:grid;gap:22px}
 @media(min-width:980px){.contact{grid-template-columns:minmax(0,1.2fr) minmax(0,.8fr)}}
