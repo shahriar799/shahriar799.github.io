@@ -35,10 +35,12 @@
     const btns = $$('.hs-btn');
     const stepW = () => { const c = $('.hs-card', hs); return c ? c.getBoundingClientRect().width + 14 : 300; };
     const smooth = () => matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth';
-    const sync = () => {
-      const max = hs.scrollWidth - hs.clientWidth - 2;
-      btns.forEach(b => { b.disabled = b.dataset.dir === '-1' ? hs.scrollLeft <= 2 : hs.scrollLeft >= max; });
-    };
+    /* endless loop: a hidden copy of the cards follows the originals */
+    const originals = $$('.hs-card', hs);
+    originals.forEach(c => { const k = c.cloneNode(true); k.classList.add('clone'); k.setAttribute('aria-hidden', 'true'); k.tabIndex = -1; hs.append(k); });
+    const loopW = () => $('.hs-card.clone', hs).offsetLeft - originals[0].offsetLeft;
+    const wrap = () => { const w = loopW(); if (hs.scrollLeft >= w) hs.scrollLeft -= w; };
+    const sync = wrap;
     btns.forEach(b => b.addEventListener('click', () => hs.scrollBy({ left: Number(b.dataset.dir) * stepW() * 2, behavior: smooth() })));
     hs.addEventListener('scroll', sync, { passive: true }); addEventListener('resize', sync); sync();
     hs.addEventListener('keydown', e => {
@@ -63,6 +65,29 @@
       }
     });
     hs.addEventListener('click', e => { if (moved > 5) { e.stopPropagation(); e.preventDefault(); moved = 0; } }, true);
+
+    /* kinetic drift: slides on its own, pauses on hover, touch, drag, wheel or focus, resumes after a pause */
+    const reduce = matchMedia('(prefers-reduced-motion: reduce)');
+    let pos = 0, inView = false, hover = false, holdUntil = 0, last = 0;
+    const SPEED = 32;                     /* px per second */
+    const hold = (ms = 3000) => { holdUntil = performance.now() + ms; hs.classList.remove('auto'); };
+    new IntersectionObserver(([en]) => { inView = en.isIntersecting; }).observe(hs);
+    hs.addEventListener('pointerenter', e => { if (e.pointerType === 'mouse') { hover = true; hs.classList.remove('auto'); } });
+    hs.addEventListener('pointerleave', e => { if (e.pointerType === 'mouse') { hover = false; hold(800); } });
+    ['pointerdown', 'touchstart', 'wheel', 'keydown', 'focusin'].forEach(ev => hs.addEventListener(ev, () => hold(3500), { passive: true }));
+    btns.forEach(b => b.addEventListener('click', () => hold(3500)));
+    const tick = now => {
+      const dt = Math.min(64, now - (last || now)); last = now;
+      const running = inView && !hover && !down && now > holdUntil && !reduce.matches && !document.hidden;
+      if (running) {
+        if (!hs.classList.contains('auto')) { hs.classList.add('auto'); pos = hs.scrollLeft; }
+        pos += SPEED * dt / 1000;
+        const w = loopW(); if (pos >= w) pos -= w;
+        hs.scrollLeft = pos;
+      }
+      requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
   }
 
   /* floating WhatsApp appears once the hero (and its own WhatsApp button) is passed */
@@ -137,8 +162,9 @@
   });
 
   $('#gallery').addEventListener('click', e => {
-    const b = e.target.closest('.g-item'); if (!b) return;
-    const vis = $$('.g-item', $('#gallery')).filter(x => !x.hidden);
+    let b = e.target.closest('.g-item'); if (!b) return;
+    if (b.classList.contains('clone')) b = $$('.hs-card:not(.clone)', $('#gallery'))[$$('.hs-card.clone', $('#gallery')).indexOf(b)];
+    const vis = $$('.g-item:not(.clone)', $('#gallery')).filter(x => !x.hidden);
     const items = vis.map(x => { const im = $('img', x); return { type: 'img', src: im.src, alt: im.alt, cap: im.alt }; });
     open(items, vis.indexOf(b));
   });

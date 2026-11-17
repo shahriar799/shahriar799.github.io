@@ -514,3 +514,9 @@ b,strong{font-weight:600}
 .foot-links a:hover{color:var(--gold)}
 @media (prefers-reduced-motion:reduce){.js .hs .hs-card{opacity:1;transform:none}}
 .foot-links a{display:inline-flex;align-items:center;min-height:44px}
+
+/* kinetic drift: no snapping while the row slides on its own */
+.hs.auto{scroll-snap-type:none}
+.hs-ctrl .hs-btn:disabled{opacity:1;cursor:pointer}
+.hs{scroll-snap-type:x proximity}
+.hs,.hs.auto{scroll-snap-type:none}
