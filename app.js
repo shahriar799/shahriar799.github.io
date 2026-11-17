@@ -27,7 +27,43 @@
   const io = new IntersectionObserver(es => es.forEach(e => {
     if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
   }), { rootMargin: '0px 0px -8% 0px' });
-  $$('.rv-up').forEach(el => io.observe(el));
+  $$('.rv-up, .hs').forEach(el => io.observe(el));
+
+  /* horizontal gallery: native swipe/trackpad, mouse drag on desktop, arrow buttons */
+  const hs = $('.hs');
+  if (hs) {
+    const btns = $$('.hs-btn');
+    const stepW = () => { const c = $('.hs-card', hs); return c ? c.getBoundingClientRect().width + 14 : 300; };
+    const smooth = () => matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth';
+    const sync = () => {
+      const max = hs.scrollWidth - hs.clientWidth - 2;
+      btns.forEach(b => { b.disabled = b.dataset.dir === '-1' ? hs.scrollLeft <= 2 : hs.scrollLeft >= max; });
+    };
+    btns.forEach(b => b.addEventListener('click', () => hs.scrollBy({ left: Number(b.dataset.dir) * stepW() * 2, behavior: smooth() })));
+    hs.addEventListener('scroll', sync, { passive: true }); addEventListener('resize', sync); sync();
+    hs.addEventListener('keydown', e => {
+      if (e.key === 'ArrowRight') { hs.scrollBy({ left: stepW(), behavior: smooth() }); e.preventDefault(); }
+      if (e.key === 'ArrowLeft') { hs.scrollBy({ left: -stepW(), behavior: smooth() }); e.preventDefault(); }
+    });
+    let down = false, sx = 0, sl = 0, moved = 0;
+    hs.addEventListener('pointerdown', e => {
+      if (e.pointerType !== 'mouse' || e.button !== 0) return;
+      down = true; moved = 0; sx = e.clientX; sl = hs.scrollLeft;
+    });
+    addEventListener('pointermove', e => {
+      if (!down) return;
+      const dx = e.clientX - sx; moved = Math.max(moved, Math.abs(dx));
+      if (moved > 5) { hs.classList.add('dragging'); hs.scrollLeft = sl - dx; }
+    });
+    addEventListener('pointerup', () => {
+      if (!down) return; down = false;
+      if (hs.classList.contains('dragging')) {
+        hs.classList.remove('dragging');
+        const w = stepW(); hs.scrollTo({ left: Math.round(hs.scrollLeft / w) * w, behavior: smooth() });
+      }
+    });
+    hs.addEventListener('click', e => { if (moved > 5) { e.stopPropagation(); e.preventDefault(); moved = 0; } }, true);
+  }
 
   /* floating WhatsApp appears once the hero (and its own WhatsApp button) is passed */
   const fab = $('.fab'), hero = $('.hero');
@@ -121,29 +157,37 @@
   /* inquiry form: WhatsApp or email, no server needed */
   const form = $('#inq'), F = form.elements, msg = $('.form-msg', form);
   let via = 'wa';
+  const say = (text, bad) => { msg.textContent = text; msg.classList.toggle('bad', !!bad); };
   $$('button[type=submit]', form).forEach(b => b.addEventListener('click', () => { via = b.dataset.via; }));
   form.addEventListener('submit', e => {
     e.preventDefault();
-    const name = F.name.value.trim(), phone = F.phone.value.trim();
-    F.name.setAttribute('aria-invalid', !name);
-    F.phone.setAttribute('aria-invalid', phone.replace(/\D/g, '').length < 7);
-    if (!name) { F.name.focus(); return; }
-    if (phone.replace(/\D/g, '').length < 7) { F.phone.focus(); return; }
+    const name = F.name.value.trim(), phone = F.phone.value.trim(), email = F.email.value.trim();
+    const badName = !name, badPhone = phone.replace(/\D/g, '').length < 7;
+    const badEmail = !!email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    F.name.setAttribute('aria-invalid', badName);
+    F.phone.setAttribute('aria-invalid', badPhone);
+    F.email.setAttribute('aria-invalid', badEmail);
+    if (badName || badPhone || badEmail) {
+      say('Please check the highlighted fields so I can reply to you.', true);
+      (badName ? F.name : badPhone ? F.phone : F.email).focus();
+      return;
+    }
     const lines = [
       'New project inquiry',
       'Name: ' + name,
       'Phone: ' + phone,
-      F.email.value.trim() && 'Email: ' + F.email.value.trim(),
+      email && 'Email: ' + email,
       'Service: ' + F.service.value,
       F.budget.value.trim() && 'Budget: ' + F.budget.value.trim(),
       F.msg.value.trim() && 'Details: ' + F.msg.value.trim()
     ].filter(Boolean).join('\n');
     if (via === 'wa') {
       window.open('https://wa.me/' + WA + '?text=' + encodeURIComponent(lines), '_blank', 'noopener');
+      say('Thanks, ' + name + '. WhatsApp opened with your message ready, just press send. If it did not open, message me at +880 1314 624969.');
     } else {
       location.href = 'mailto:' + MAIL + '?subject=' + encodeURIComponent('Project inquiry: ' + F.service.value) + '&body=' + encodeURIComponent(lines);
+      say('Thanks, ' + name + '. Your email app should open with the message ready. If not, write to ' + MAIL + '.');
     }
-    msg.textContent = 'Thanks, ' + name + '. Your message is ready to send.';
   });
-  ['name', 'phone'].forEach(n => F[n].addEventListener('input', () => F[n].removeAttribute('aria-invalid')));
+  ['name', 'phone', 'email'].forEach(n => F[n].addEventListener('input', () => { F[n].removeAttribute('aria-invalid'); if (msg.classList.contains('bad')) say(''); }));
 })();
